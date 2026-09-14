@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>合成大西瓜 · 10张图导入导出 + 背景更换</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: linear-gradient(145deg, #2b1b0e 0%, #4a2e1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Quicksand', sans-serif;
+            padding: 8px;
+        }
+        .game-layout {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
+            width: 100%;
+        }
+        /* 侧边栏 */
+        .sidebar {
+            background: #fbe9d2;
+            border-radius: 28px;
+            box-shadow: 0 15px 22px rgba(0,0,0,0.5), inset 0 1px 6px rgba(255,255,200,0.6);
+            padding: 14px 10px;
+            border: 3px solid #b48b5a;
+            width: 210px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .sidebar h3 {
+            color: #4e2e1a;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .sidebar h3 span {
+            background: #b48b5a;
+            color: #fdf0d8;
+            padding: 1px 7px;
+            border-radius: 30px;
+            font-size: 0.6rem;
+        }
+        .fruit-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #efdbbc;
+            padding: 5px 8px;
+            border-radius: 40px;
+            box-shadow: inset 0 -1px 0 #b3926b;
+            transition: all 0.1s ease;
+        }
+        .fruit-preview {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fdf6e9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: inset 0 0 0 2px #dbbd94, 0 1px 4px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+            overflow: hidden;
+            line-height: 1;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.1s;
+        }
+        .fruit-preview:hover {
+            transform: scale(1.05);
+        }
+        .fruit-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .fruit-preview .upload-hint {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: #b48b5a;
+            color: white;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            border: 1px solid #fdf6e9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .fruit-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+        .fruit-name-input {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #4e2e1a;
+            background: #fdf6e9;
+            border: 1px solid #dbbd94;
+            border-radius: 20px;
+            padding: 2px 8px;
+            width: 100%;
+            font-family: 'Quicksand', sans-serif;
+            outline: none;
+            transition: border 0.1s;
+        }
+        .fruit-name-input:focus {
+            border-color: #b48b5a;
+            background: #fffcf5;
+        }
+        .fruit-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .upload-btn, .clear-btn {
+            flex: 1;
+            padding: 3px 0;
+            border-radius: 30px;
+            border: none;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 0.6rem;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            box-shadow: 0 1px 0 #9b6d3f;
+            border: 1px solid #f5dbb0;
+            color: #2c1a0b;
+        }
+        .upload-btn {
+            background: #e7b87b;
+        }
+        .upload-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 0 #9b6d3f;
+        }
+        .clear-btn {
+            background: #dbbd94;
+            box-shadow: 0 1px 0 #9b6d3f;
+        }
+        .clear-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 0 #9b6d3f;
+        }
+        /* 全局操作按钮区 */
+        .global-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 6px;
+            border-top: 2px solid #dbbd94;
+            padding-top: 8px;
+        }
+        .global-btn {
+            padding: 6px 0;
+            border-radius: 30px;
+            border: none;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            box-shadow: 0 2px 0 #9b6d3f;
+            border: 1px solid #f5dbb0;
+            color: #2c1a0b;
+            background: #e7b87b;
+        }
+        .global-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 #9b6d3f;
+        }
+        .global-btn.import {
+            background: #a8d8b9;
+        }
+        .global-btn.export {
+            background: #b8c9e8;
+        }
+        .global-btn.bg {
+            background: #e8b8d8;
+        }
+        /* 右侧游戏区 */
+        .game-wrapper {
+            background: #fbe9d2;
+            border-radius: 36px 36px 24px 24px;
+            box-shadow: 0 15px 22px rgba(0,0,0,0.5), inset 0 1px 6px rgba(255,255,200,0.6);
+            padding: 12px 12px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 3px solid #b48b5a;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 8px 8px;
+        }
+        .score-box {
+            background: #4e2e1a;
+            border-radius: 100px;
+            padding: 4px 16px;
+            color: #fbe9b6;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            box-shadow: inset 0 -2px 0 #1f1208, 0 3px 0 #1f1208;
+            text-shadow: 0 1px 0 #1f1208;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .score-box span {
+            font-size: 0.75rem;
+            color: #e6c99c;
+            margin-right: 2px;
+        }
+        .canvas-container {
+            position: relative;
+            background: #fdf6e9;
+            border-radius: 18px;
+            padding: 0;
+            box-shadow: inset 0 0 0 4px #dbbd94, inset 0 0 12px #9e7c5a, 0 10px 14px rgba(0,0,0,0.3);
+            line-height: 0;
+            margin-bottom: 6px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 18px;
+            background: #fdf6e9;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .hint {
+            font-size: 0.7rem;
+            color: #6b4c2c;
+            background: #efdbbc;
+            padding: 5px 12px;
+            border-radius: 40px;
+            margin: 4px 0 8px;
+            font-weight: 600;
+            box-shadow: inset 0 -1px 0 #b3926b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 3px;
+        }
+        .btn {
+            background: #e7b87b;
+            border: none;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 6px 18px;
+            border-radius: 30px;
+            color: #2c1a0b;
+            box-shadow: 0 4px 0 #9b6d3f, 0 5px 7px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.06s ease;
+            border: 1px solid #f5dbb0;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #9b6d3f, 0 5px 7px rgba(0,0,0,0.3);
+        }
+        .btn.reset {
+            background: #c9a87c;
+            box-shadow: 0 4px 0 #7e5d3b;
+        }
+        /* 滚动条美化 */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #efdbbc;
+            border-radius: 20px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #b48b5a;
+            border-radius: 20px;
+        }
+        /* 隐藏的文件输入 */
+        .file-input {
+            display: none;
+        }
+        .canvas-wrapper {
+            max-width: 420px;
+            width: 100%;
+        }
+        /* 提示toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4e2e1a;
+            color: #fbe9b6;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            border: 2px solid #b48b5a;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="game-layout">
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <h3>🎨 水果设置 <span>上传/改名</span></h3>
+        <!-- 由JS动态生成水果列表 -->
+    </div>
+
+    <!-- 游戏主区域 -->
+    <div class="game-wrapper">
+        <div class="header">
+            <div class="score-box">
+                <span>🍉</span> <span id="scoreDisplay">0</span>
+            </div>
+            <div style="font-weight:700; color:#8b6b45; font-size:0.8rem;">合成大西瓜</div>
+        </div>
+        <div class="canvas-container canvas-wrapper" id="canvasContainer">
+            <canvas id="gameCanvas" width="700" height="900"></canvas>
+        </div>
+        <div class="hint">
+            <span>💡 左右拖动顶部水果，释放后掉落</span>
+        </div>
+        <div class="button-group">
+            <button class="btn" id="newGameBtn">🍃 新一局</button>
+        </div>
+    </div>
+</div>
+
+<!-- 提示 -->
+<div class="toast" id="toast"></div>
+
+<script>
+    (function(){
+        // ---------- 游戏配置 ----------
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const toastEl = document.getElementById('toast');
+
+        const W = 700, H = 900;
+
+        const RADII = [22, 32, 44, 56, 72, 90, 110, 135, 165, 200];
+        const defaultEmojis = ['🍒', '🍊', '🍋', '🥝', '🍏', '🍐', '🫐', '🍇', '🐉', '🍉'];
+        const defaultBgColors = [
+            '#FFCDD2', '#FFE0B2', '#FFF9C4', '#DCEDC8', '#C8E6C9',
+            '#B2DFDB', '#BBDEFB', '#E1BEE7', '#F8BBD0', '#FFF9C4'
+        ];
+        let fruitNames = ['樱桃', '橘子', '柠檬', '猕猴桃', '青苹果', '梨', '蓝莓', '葡萄', '火龙果', '西瓜'];
+
+        const TOP_LINE_Y = 120;
+
+        // 贴图模板 (10个等级)
+        let textures = [];
+
+        // 背景图片 (null 表示默认)
+        let backgroundImage = null;
+
+        function initTextures() {
+            textures = RADII.map((_, idx) => ({
+                type: 'emoji',
+                emoji: defaultEmojis[idx] || '🍎',
+                bgColor: defaultBgColors[idx] || '#EEE',
+                image: null,
+                imageSrc: null
+            }));
+        }
+        initTextures();
+
+        // Toast 提示
+        let toastTimer = null;
+        function showToast(msg, duration = 2000) {
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, duration);
+        }
+
+        // ---------- 物理引擎 ----------
+        const { Engine, World, Bodies, Body, Composite, Events, Vector } = Matter;
+        const engine = Engine.create({
+            gravity: { x: 0, y: 0.8, scale: 0.001 }
+        });
+        const world = engine.world;
+
+        const wallThickness = 60;
+        const ground = Bodies.rectangle(W/2, H + wallThickness/2, W, wallThickness, { isStatic: true, friction: 0.4, restitution: 0.1 });
+        const leftWall = Bodies.rectangle(-wallThickness/2, H/2, wallThickness, H, { isStatic: true, friction: 0.4 });
+        const rightWall = Bodies.rectangle(W + wallThickness/2, H/2, wallThickness, H, { isStatic: true, friction: 0.4 });
+        Composite.add(world, [ground, leftWall, rightWall]);
+
+        // ---------- 游戏状态 ----------
+        let fruits = [];
+        let score = 0;
+        let gameOver = false;
+
+        let pendingFruit = null;
+        let isDragging = false;
+
+        function updateScore() {
+            scoreDisplay.textContent = score;
+        }
+
+        function createFruitBody(x, y, level) {
+            const radius = RADII[level];
+            const body = Bodies.circle(x, y, radius, {
+                restitution: 0.2,
+                friction: 0.3,
+                frictionAir: 0.02,
+                density: 0.001 * (level + 1),
+                label: 'fruit_' + Date.now() + '_' + Math.random(),
+                slop: 0.02
+            });
+
+            const fruitData = {
+                body: body,
+                level: level,
+                radius: radius,
+                texture: textures[level]
+            };
+            body.plugin = { fruitData };
+            body.fruitData = fruitData;
+
+            return body;
+        }
+
+        function addFruitToWorld(body) {
+            Composite.add(world, body);
+            fruits.push(body);
+        }
+
+        function removeFruit(body) {
+            const index = fruits.indexOf(body);
+            if (index !== -1) fruits.splice(index, 1);
+            Composite.remove(world, body);
+        }
+
+        function spawnPendingFruit() {
+            if (gameOver) return;
+            if (pendingFruit) return;
+            if (fruits.length > 45) return;
+
+            const spawnLevels = [0, 0, 0, 1, 1, 2, 2, 3];
+            const level = spawnLevels[Math.floor(Math.random() * spawnLevels.length)];
+            const radius = RADII[level];
+
+            const x = W/2 + (Math.random() - 0.5) * 300;
+            const y = TOP_LINE_Y - radius - 15;
+
+            const body = createFruitBody(x, y, level);
+            pendingFruit = body;
+        }
+
+        function releasePendingFruit() {
+            if (!pendingFruit) return;
+            if (isDragging) return;
+
+            const body = pendingFruit;
+            addFruitToWorld(body);
+            pendingFruit = null;
+
+            setTimeout(() => {
+                if (!gameOver) spawnPendingFruit();
+            }, 550);
+        }
+
+        // ---------- 合成逻辑 ----------
+        function handleCollision(event) {
+            const pairs = event.pairs;
+            const processed = new Set();
+
+            for (let pair of pairs) {
+                const bodyA = pair.bodyA;
+                const bodyB = pair.bodyB;
+
+                if (!bodyA.plugin?.fruitData || !bodyB.plugin?.fruitData) continue;
+
+                const dataA = bodyA.plugin.fruitData;
+                const dataB = bodyB.plugin.fruitData;
+
+                if (dataA.level === dataB.level && !processed.has(bodyA.id) && !processed.has(bodyB.id)) {
+                    const level = dataA.level;
+                    if (level >= RADII.length - 1) continue;
+
+                    processed.add(bodyA.id);
+                    processed.add(bodyB.id);
+
+                    const posA = bodyA.position;
+                    const posB = bodyB.position;
+                    const midX = (posA.x + posB.x) / 2;
+                    const midY = (posA.y + posB.y) / 2;
+
+                    removeFruit(bodyA);
+                    removeFruit(bodyB);
+
+                    const newLevel = level + 1;
+                    const newBody = createFruitBody(midX, midY, newLevel);
+                    addFruitToWorld(newBody);
+
+                    score += (newLevel + 1) * 15;
+                    updateScore();
+
+                    Body.setVelocity(newBody, { x: 0, y: -2 });
+                }
+            }
+        }
+
+        // ---------- 绘制 ----------
+        function render() {
+            ctx.clearRect(0, 0, W, H);
+
+            // 绘制背景图片 (如果有)
+            if (backgroundImage) {
+                ctx.drawImage(backgroundImage, 0, 0, W, H);
+            } else {
+                ctx.fillStyle = '#fdf6e9';
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            // 顶部虚线
+            ctx.beginPath();
+            ctx.strokeStyle = '#d4b594';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([12, 16]);
+            ctx.beginPath();
+            ctx.moveTo(0, TOP_LINE_Y);
+            ctx.lineTo(W, TOP_LINE_Y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 地面虚线
+            ctx.beginPath();
+            ctx.strokeStyle = '#d4b594';
+            ctx.lineWidth = 6;
+            ctx.setLineDash([20, 20]);
+            ctx.beginPath();
+            ctx.moveTo(0, H-6);
+            ctx.lineTo(W, H-6);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            for (let body of fruits) {
+                drawFruit(body);
+            }
+
+            if (pendingFruit) {
+                drawFruit(pendingFruit);
+                if (isDragging) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(180, 140, 90, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([8, 12]);
+                    ctx.moveTo(pendingFruit.position.x, pendingFruit.position.y);
+                    ctx.lineTo(pendingFruit.position.x, H - 40);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        function drawFruit(body) {
+            const fruitData = body.plugin?.fruitData;
+            if (!fruitData) return;
+
+            const { x, y } = body.position;
+            const radius = fruitData.radius;
+            const angle = body.angle;
+            const texture = fruitData.texture;
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetY = 4;
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.fillStyle = texture.bgColor || '#DDD';
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            if (texture.type === 'emoji') {
+                ctx.font = `${radius * 1.2}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetY = 2;
+                ctx.fillStyle = '#000';
+                ctx.fillText(texture.emoji, 0, 0);
+            } else if (texture.type === 'image' && texture.image) {
+                const img = texture.image;
+                const size = radius * 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.clip();
+                ctx.drawImage(img, -radius, -radius, size, size);
+            } else {
+                ctx.font = `${radius * 1.2}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#000';
+                ctx.fillText('🍎', 0, 0);
+            }
+
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.beginPath();
+            ctx.arc(-radius*0.2, -radius*0.2, radius*0.15, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // ---------- 物理更新 ----------
+        function updatePhysics() {
+            Engine.update(engine, 1000 / 60);
+
+            for (let i = fruits.length - 1; i >= 0; i--) {
+                const body = fruits[i];
+                if (body.position.y > H + 200) {
+                    removeFruit(body);
+                }
+            }
+
+            requestAnimationFrame(updatePhysics);
+        }
+
+        // ---------- 拖拽交互 (仅水平移动) ----------
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function onPointerDown(e) {
+            e.preventDefault();
+            if (gameOver) return;
+
+            const pos = getCanvasCoords(e);
+
+            if (pendingFruit) {
+                const body = pendingFruit;
+                const dist = Vector.magnitude(Vector.sub(pos, body.position));
+                if (dist <= body.plugin.fruitData.radius) {
+                    isDragging = true;
+                    canvas.style.cursor = 'grabbing';
+                }
+            }
+        }
+
+        function onPointerMove(e) {
+            e.preventDefault();
+            if (!isDragging || !pendingFruit) return;
+
+            const pos = getCanvasCoords(e);
+            const radius = pendingFruit.plugin.fruitData.radius;
+
+            let newX = pos.x;
+            newX = Math.min(Math.max(newX, radius + 5), W - radius - 5);
+
+            const currentY = pendingFruit.position.y;
+
+            Body.setPosition(pendingFruit, { x: newX, y: currentY });
+            Body.setVelocity(pendingFruit, { x: 0, y: 0 });
+            Body.setAngularVelocity(pendingFruit, 0);
+        }
+
+        function onPointerUp(e) {
+            e.preventDefault();
+            if (!isDragging || !pendingFruit) {
+                canvas.style.cursor = 'grab';
+                return;
+            }
+
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+            releasePendingFruit();
+        }
+
+        canvas.addEventListener('mousedown', onPointerDown);
+        canvas.addEventListener('mousemove', onPointerMove);
+        canvas.addEventListener('mouseup', onPointerUp);
+        canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+        canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+        canvas.addEventListener('touchend', onPointerUp, { passive: false });
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            if (isDragging && pendingFruit) {
+                isDragging = false;
+                releasePendingFruit();
+            }
+        });
+
+        // 新游戏
+        document.getElementById('newGameBtn').addEventListener('click', () => {
+            for (let body of [...fruits]) {
+                removeFruit(body);
+            }
+            fruits = [];
+            if (pendingFruit) {
+                pendingFruit = null;
+            }
+            isDragging = false;
+            score = 0;
+            updateScore();
+            gameOver = false;
+            spawnPendingFruit();
+        });
+
+        Events.on(engine, 'collisionStart', handleCollision);
+
+        Events.on(engine, 'beforeUpdate', () => {
+            for (let body of fruits) {
+                const speed = Vector.magnitude(body.velocity);
+                if (speed > 20) {
+                    Body.setVelocity(body, Vector.mult(Vector.normalise(body.velocity), 20));
+                }
+                if (body.position.x < 0) Body.setPosition(body, { x: RADII[body.plugin.fruitData.level] + 5, y: body.position.y });
+                if (body.position.x > W) Body.setPosition(body, { x: W - RADII[body.plugin.fruitData.level] - 5, y: body.position.y });
+            }
+        });
+
+        // ---------- 侧边栏 ----------
+        function buildSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            while (sidebar.children.length > 1) {
+                sidebar.removeChild(sidebar.lastChild);
+            }
+
+            for (let level = 0; level < RADII.length; level++) {
+                const item = document.createElement('div');
+                item.className = 'fruit-item';
+
+                const preview = document.createElement('div');
+                preview.className = 'fruit-preview';
+                preview.id = `preview-${level}`;
+                preview.title = '点击上传图片';
+                updatePreview(preview, level);
+
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.className = 'file-input';
+                fileInput.id = `file-${level}`;
+
+                preview.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    loadImageToTexture(file, level, preview);
+                    fileInput.value = '';
+                });
+
+                const info = document.createElement('div');
+                info.className = 'fruit-info';
+
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'fruit-name-input';
+                nameInput.value = fruitNames[level];
+                nameInput.dataset.level = level;
+                nameInput.placeholder = '输入名称';
+                nameInput.addEventListener('input', (e) => {
+                    const lvl = parseInt(e.target.dataset.level);
+                    fruitNames[lvl] = e.target.value || `水果${lvl+1}`;
+                });
+
+                const actions = document.createElement('div');
+                actions.className = 'fruit-actions';
+
+                const uploadBtn = document.createElement('button');
+                uploadBtn.className = 'upload-btn';
+                uploadBtn.innerHTML = '📁 上传';
+                uploadBtn.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                const clearBtn = document.createElement('button');
+                clearBtn.className = 'clear-btn';
+                clearBtn.innerHTML = '↺ 重置';
+                clearBtn.addEventListener('click', () => {
+                    const tex = textures[level];
+                    tex.type = 'emoji';
+                    tex.emoji = defaultEmojis[level];
+                    tex.bgColor = defaultBgColors[level];
+                    tex.image = null;
+                    tex.imageSrc = null;
+                    updatePreview(preview, level);
+                });
+
+                actions.appendChild(uploadBtn);
+                actions.appendChild(clearBtn);
+                info.appendChild(nameInput);
+                info.appendChild(actions);
+                item.appendChild(preview);
+                item.appendChild(info);
+                item.appendChild(fileInput);
+                sidebar.appendChild(item);
+            }
+
+            // 全局操作区
+            const globalActions = document.createElement('div');
+            globalActions.className = 'global-actions';
+
+            // 导入压缩包 (10张)
+            const importBtn = document.createElement('button');
+            importBtn.className = 'global-btn import';
+            importBtn.innerHTML = '📦 导入压缩包 (1-10)';
+            const importInput = document.createElement('input');
+            importInput.type = 'file';
+            importInput.accept = '.zip';
+            importInput.className = 'file-input';
+            importInput.id = 'zipImportInput';
+            importBtn.addEventListener('click', () => importInput.click());
+            importInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                importZip(file);
+                importInput.value = '';
+            });
+            globalActions.appendChild(importBtn);
+            globalActions.appendChild(importInput);
+
+            // 导出压缩包 (10张)
+            const exportBtn = document.createElement('button');
+            exportBtn.className = 'global-btn export';
+            exportBtn.innerHTML = '📥 导出压缩包 (1-10)';
+            exportBtn.addEventListener('click', exportZip);
+            globalActions.appendChild(exportBtn);
+
+            // 更换背景
+            const bgBtn = document.createElement('button');
+            bgBtn.className = 'global-btn bg';
+            bgBtn.innerHTML = '🖼️ 更换背景图片';
+            const bgInput = document.createElement('input');
+            bgInput.type = 'file';
+            bgInput.accept = 'image/*';
+            bgInput.className = 'file-input';
+            bgInput.id = 'bgInput';
+            bgBtn.addEventListener('click', () => bgInput.click());
+            bgInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        backgroundImage = img;
+                        showToast('背景已更换');
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+                bgInput.value = '';
+            });
+            globalActions.appendChild(bgBtn);
+            globalActions.appendChild(bgInput);
+
+            // 重置背景
+            const resetBgBtn = document.createElement('button');
+            resetBgBtn.className = 'global-btn';
+            resetBgBtn.style.background = '#dbbd94';
+            resetBgBtn.innerHTML = '🔄 恢复默认背景';
+            resetBgBtn.addEventListener('click', () => {
+                backgroundImage = null;
+                showToast('背景已恢复默认');
+            });
+            globalActions.appendChild(resetBgBtn);
+
+            // 重置全部贴图
+            const resetAllBtn = document.createElement('button');
+            resetAllBtn.className = 'global-btn';
+            resetAllBtn.style.background = '#c9a87c';
+            resetAllBtn.innerHTML = '🎨 重置全部贴图';
+            resetAllBtn.addEventListener('click', () => {
+                initTextures();
+                refreshAllPreviews();
+                showToast('已重置全部贴图');
+            });
+            globalActions.appendChild(resetAllBtn);
+
+            sidebar.appendChild(globalActions);
+        }
+
+        // 加载图片到指定等级贴图
+        function loadImageToTexture(file, level, previewEl) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const tex = textures[level];
+                    tex.type = 'image';
+                    tex.image = img;
+                    tex.imageSrc = ev.target.result;
+                    tex.bgColor = 'rgba(255,255,240,0.8)';
+                    updatePreview(previewEl || document.getElementById(`preview-${level}`), level);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 更新预览
+        function updatePreview(previewEl, level) {
+            if (!previewEl) return;
+            const tex = textures[level];
+            previewEl.innerHTML = '';
+
+            if (tex.type === 'image' && tex.image) {
+                const img = document.createElement('img');
+                img.src = tex.image.src;
+                previewEl.appendChild(img);
+                previewEl.style.background = tex.bgColor;
+            } else {
+                previewEl.textContent = tex.emoji;
+                previewEl.style.fontSize = '20px';
+                previewEl.style.background = tex.bgColor;
+            }
+            const hint = document.createElement('div');
+            hint.className = 'upload-hint';
+            hint.textContent = '📷';
+            previewEl.appendChild(hint);
+        }
+
+        function refreshAllPreviews() {
+            for (let level = 0; level < RADII.length; level++) {
+                const preview = document.getElementById(`preview-${level}`);
+                if (preview) updatePreview(preview, level);
+            }
+        }
+
+        // ---------- 导入压缩包 (10张: 1.jpg ~ 10.jpg 对应等级0~9) ----------
+        async function importZip(file) {
+            try {
+                showToast('正在导入...', 5000);
+                const zip = await JSZip.loadAsync(file);
+
+                let loadedCount = 0;
+                const promises = [];
+
+                // 编号1~10 对应 等级0~9 (1->樱桃, 2->橘子, ..., 10->西瓜)
+                for (let num = 1; num <= 10; num++) {
+                    const levelIndex = num - 1; // 等级索引 0~9
+                    const baseName = num.toString();
+                    const exts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+                    let foundFile = null;
+                    let foundExt = null;
+
+                    for (const ext of exts) {
+                        const name = `${baseName}.${ext}`;
+                        if (zip.files[name]) {
+                            foundFile = zip.files[name];
+                            foundExt = ext;
+                            break;
+                        }
+                        const nameUpper = `${baseName}.${ext.toUpperCase()}`;
+                        if (zip.files[nameUpper]) {
+                            foundFile = zip.files[nameUpper];
+                            foundExt = ext;
+                            break;
+                        }
+                    }
+
+                    if (foundFile) {
+                        const promise = foundFile.async('base64').then((base64) => {
+                            const mime = foundExt === 'jpg' || foundExt === 'jpeg' ? 'image/jpeg' :
+                                         foundExt === 'png' ? 'image/png' :
+                                         foundExt === 'gif' ? 'image/gif' :
+                                         foundExt === 'webp' ? 'image/webp' :
+                                         foundExt === 'bmp' ? 'image/bmp' : 'image/jpeg';
+                            const dataUrl = `data:${mime};base64,${base64}`;
+                            return new Promise((resolve) => {
+                                const img = new Image();
+                                img.onload = () => {
+                                    const tex = textures[levelIndex];
+                                    tex.type = 'image';
+                                    tex.image = img;
+                                    tex.imageSrc = dataUrl;
+                                    tex.bgColor = 'rgba(255,255,240,0.8)';
+                                    const preview = document.getElementById(`preview-${levelIndex}`);
+                                    if (preview) updatePreview(preview, levelIndex);
+                                    loadedCount++;
+                                    resolve(true);
+                                };
+                                img.onerror = () => resolve(false);
+                                img.src = dataUrl;
+                            });
+                        });
+                        promises.push(promise);
+                    }
+                }
+
+                await Promise.all(promises);
+                if (loadedCount > 0) {
+                    showToast(`成功导入 ${loadedCount} 张图片 (1-10)`);
+                } else {
+                    showToast('未找到匹配的图片文件 (1.jpg ~ 10.jpg)');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('导入失败: ' + err.message);
+            }
+        }
+
+        // ---------- 导出压缩包 (10张: 1.jpg ~ 10.jpg 对应等级0~9) ----------
+        async function exportZip() {
+            try {
+                showToast('正在导出...', 5000);
+                const zip = new JSZip();
+
+                let count = 0;
+                // 编号1~10 对应 等级0~9
+                for (let num = 1; num <= 10; num++) {
+                    const levelIndex = num - 1;
+                    const tex = textures[levelIndex];
+                    if (tex.type === 'image' && tex.imageSrc) {
+                        const dataUrl = tex.imageSrc;
+                        const base64 = dataUrl.split(',')[1];
+                        const mime = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+                        let ext = 'jpg';
+                        if (mime.includes('png')) ext = 'png';
+                        else if (mime.includes('gif')) ext = 'gif';
+                        else if (mime.includes('webp')) ext = 'webp';
+                        else if (mime.includes('bmp')) ext = 'bmp';
+                        zip.file(`${num}.${ext}`, base64, { base64: true });
+                        count++;
+                    }
+                }
+
+                if (count === 0) {
+                    showToast('没有可导出的图片 (等级1~10未上传图片)');
+                    return;
+                }
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                const url = URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'fruits_textures_10.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast(`成功导出 ${count} 张图片`);
+            } catch (err) {
+                console.error(err);
+                showToast('导出失败: ' + err.message);
+            }
+        }
+
+        buildSidebar();
+
+        // ---------- 启动 ----------
+        spawnPendingFruit();
+        requestAnimationFrame(render);
+        requestAnimationFrame(updatePhysics);
+
+        setInterval(() => {
+            if (!gameOver && !pendingFruit && !isDragging && fruits.length < 45) {
+                spawnPendingFruit();
+            }
+        }, 600);
+
+        updateScore();
+    })();
+</script>
+</body>
+</html>
