@@ -4,7 +4,7 @@
 
 ## 🎮 在线试玩
 
-👉 [点击这里开始游戏](https://shizwd.github.io/musicmizu/game/)
+👉 [点击这里开始游戏](https://shizwd.github.io/watermelon-merge/)
 
 > 也可以直接打开 `index.html` 本地游玩
 
