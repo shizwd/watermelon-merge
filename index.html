@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>合成大西瓜 · 内置音乐</title>
+    <title>合成大西瓜 · 全功能版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
@@ -163,21 +163,10 @@
             border: 1px solid #f5dbb0;
             color: #2c1a0b;
         }
-        .upload-btn {
-            background: #e7b87b;
-        }
-        .upload-btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 0 0 #9b6d3f;
-        }
-        .clear-btn {
-            background: #dbbd94;
-            box-shadow: 0 1px 0 #9b6d3f;
-        }
-        .clear-btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 0 0 #9b6d3f;
-        }
+        .upload-btn { background: #e7b87b; }
+        .upload-btn:active { transform: translateY(1px); box-shadow: 0 0 0 #9b6d3f; }
+        .clear-btn { background: #dbbd94; box-shadow: 0 1px 0 #9b6d3f; }
+        .clear-btn:active { transform: translateY(1px); box-shadow: 0 0 0 #9b6d3f; }
         .global-actions {
             display: flex;
             flex-direction: column;
@@ -204,10 +193,7 @@
             color: #2c1a0b;
             background: #e7b87b;
         }
-        .global-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 0 0 #9b6d3f;
-        }
+        .global-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #9b6d3f; }
         .global-btn.import { background: #a8d8b9; }
         .global-btn.export { background: #b8c9e8; }
         .global-btn.bg { background: #e8b8d8; }
@@ -244,11 +230,7 @@
             align-items: center;
             gap: 5px;
         }
-        .score-box span {
-            font-size: 0.75rem;
-            color: #e6c99c;
-            margin-right: 2px;
-        }
+        .score-box span { font-size: 0.75rem; color: #e6c99c; margin-right: 2px; }
         .canvas-container {
             position: relative;
             background: #fdf6e9;
@@ -267,9 +249,7 @@
             background: #fdf6e9;
             cursor: grab;
         }
-        canvas:active {
-            cursor: grabbing;
-        }
+        canvas:active { cursor: grabbing; }
         .hint {
             font-size: 0.7rem;
             color: #6b4c2c;
@@ -285,11 +265,7 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 3px;
-        }
+        .button-group { display: flex; gap: 10px; margin-top: 3px; }
         .btn {
             background: #e7b87b;
             border: none;
@@ -308,15 +284,9 @@
             align-items: center;
             gap: 4px;
         }
-        .btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #9b6d3f, 0 5px 7px rgba(0,0,0,0.3);
-        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #9b6d3f, 0 5px 7px rgba(0,0,0,0.3); }
 
-        /* 音乐播放器 */
-        .music-player {
-            width: 240px;
-        }
+        .music-player { width: 240px; }
         .music-info {
             background: #efdbbc;
             border-radius: 20px;
@@ -339,19 +309,12 @@
             overflow: hidden;
             transition: transform 0.3s;
         }
-        .music-cover.playing {
-            animation: spin 8s linear infinite;
-        }
+        .music-cover.playing { animation: spin 8s linear infinite; }
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        .music-cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
+        .music-cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         .music-title {
             font-size: 0.75rem;
             font-weight: 700;
@@ -405,7 +368,6 @@
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid #fdf6e9;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
         .music-controls {
             display: flex;
@@ -430,10 +392,7 @@
             transition: all 0.06s;
             border: 1px solid #f5dbb0;
         }
-        .ctrl-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #9b6d3f;
-        }
+        .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #9b6d3f; }
         .ctrl-btn.play-btn {
             width: 44px;
             height: 44px;
@@ -441,14 +400,8 @@
             background: #f0c48a;
             box-shadow: 0 4px 0 #9b6d3f;
         }
-        .ctrl-btn.play-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #9b6d3f;
-        }
-        .ctrl-btn.active {
-            background: #b48b5a;
-            color: #fdf0d8;
-        }
+        .ctrl-btn.play-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #9b6d3f; }
+        .ctrl-btn.active { background: #b48b5a; color: #fdf0d8; }
         .music-volume {
             display: flex;
             align-items: center;
@@ -508,18 +461,9 @@
             white-space: nowrap;
             overflow: hidden;
         }
-        .music-list-item:hover {
-            background: #efdbbc;
-        }
-        .music-list-item.active {
-            background: #e7b87b;
-            color: #2c1a0b;
-        }
-        .music-list-item .item-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .music-list-item:hover { background: #efdbbc; }
+        .music-list-item.active { background: #e7b87b; color: #2c1a0b; }
+        .music-list-item .item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
         .music-list-item .del-btn {
             background: transparent;
             border: none;
@@ -529,9 +473,7 @@
             padding: 0 2px;
             line-height: 1;
         }
-        .music-list-item .del-btn:hover {
-            color: #d32f2f;
-        }
+        .music-list-item .del-btn:hover { color: #d32f2f; }
         .music-list-item .builtin-tag {
             font-size: 0.5rem;
             background: #a8d8b9;
@@ -540,34 +482,14 @@
             border-radius: 10px;
             font-weight: 700;
         }
-        .music-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .music-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .music-list::-webkit-scrollbar-thumb {
-            background: #dbbd94;
-            border-radius: 20px;
-        }
-        .sidebar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .sidebar::-webkit-scrollbar-track {
-            background: #efdbbc;
-            border-radius: 20px;
-        }
-        .sidebar::-webkit-scrollbar-thumb {
-            background: #b48b5a;
-            border-radius: 20px;
-        }
-        .file-input {
-            display: none;
-        }
-        .canvas-wrapper {
-            max-width: 420px;
-            width: 100%;
-        }
+        .music-list::-webkit-scrollbar { width: 4px; }
+        .music-list::-webkit-scrollbar-track { background: transparent; }
+        .music-list::-webkit-scrollbar-thumb { background: #dbbd94; border-radius: 20px; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: #efdbbc; border-radius: 20px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #b48b5a; border-radius: 20px; }
+        .file-input { display: none; }
+        .canvas-wrapper { max-width: 420px; width: 100%; }
         .toast {
             position: fixed;
             top: 20px;
@@ -586,11 +508,8 @@
             pointer-events: none;
             border: 2px solid #b48b5a;
         }
-        .toast.show {
-            opacity: 1;
-        }
+        .toast.show { opacity: 1; }
 
-        /* 音乐网站弹窗 */
         .music-site-modal {
             display: none;
             position: fixed;
@@ -603,9 +522,7 @@
             justify-content: center;
             align-items: center;
         }
-        .music-site-modal.show {
-            display: flex;
-        }
+        .music-site-modal.show { display: flex; }
         .music-site-inner {
             background: #fbe9d2;
             border-radius: 28px;
@@ -628,15 +545,8 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .music-site-header h3 {
-            color: #4e2e1a;
-            font-size: 0.95rem;
-            margin: 0;
-        }
-        .music-site-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .music-site-header h3 { color: #4e2e1a; font-size: 0.95rem; margin: 0; }
+        .music-site-actions { display: flex; gap: 8px; }
         .music-site-actions button {
             padding: 5px 14px;
             border-radius: 30px;
@@ -649,10 +559,7 @@
             border: 1px solid #f5dbb0;
             color: #2c1a0b;
         }
-        .music-site-actions button:active {
-            transform: translateY(2px);
-            box-shadow: 0 0 0 #9b6d3f;
-        }
+        .music-site-actions button:active { transform: translateY(2px); box-shadow: 0 0 0 #9b6d3f; }
         .music-site-actions .close-btn { background: #dbbd94; }
         .music-tabs {
             display: flex;
@@ -677,20 +584,9 @@
             transition: all 0.1s;
             flex-shrink: 0;
         }
-        .music-tab:hover {
-            background: #e7b87b;
-        }
-        .music-tab.active {
-            background: #b48b5a;
-            color: #fdf0d8;
-            border-color: #9b6d3f;
-        }
-        .music-site-iframe {
-            flex: 1;
-            width: 100%;
-            border: none;
-            background: #fff;
-        }
+        .music-tab:hover { background: #e7b87b; }
+        .music-tab.active { background: #b48b5a; color: #fdf0d8; border-color: #9b6d3f; }
+        .music-site-iframe { flex: 1; width: 100%; border: none; background: #fff; }
         .custom-url-bar {
             display: flex;
             gap: 6px;
@@ -709,9 +605,7 @@
             font-size: 0.7rem;
             outline: none;
         }
-        .custom-url-bar input:focus {
-            border-color: #b48b5a;
-        }
+        .custom-url-bar input:focus { border-color: #b48b5a; }
         .custom-url-bar button {
             padding: 5px 14px;
             border-radius: 20px;
@@ -725,19 +619,11 @@
             border: 1px solid #f5dbb0;
             color: #2c1a0b;
         }
-        .custom-url-bar button:active {
-            transform: translateY(2px);
-            box-shadow: 0 0 0 #9b6d3f;
-        }
+        .custom-url-bar button:active { transform: translateY(2px); box-shadow: 0 0 0 #9b6d3f; }
 
         @media (max-width: 1100px) {
-            .game-layout {
-                flex-wrap: wrap;
-            }
-            .music-player {
-                width: 100%;
-                max-width: 420px;
-            }
+            .game-layout { flex-wrap: wrap; }
+            .music-player { width: 100%; max-width: 420px; }
         }
     </style>
 </head>
@@ -880,14 +766,11 @@
         let isPlaying = false;
         let playMode = 'loop';
 
-        // ★★★ 内置歌曲在这里配置 ★★★
-        // 把你的音乐文件放在仓库的 music/ 文件夹里，然后在这里列出
-        // 格式: { name: '显示名称', url: '相对路径', cover: '封面图路径(可选)' }
+        // ★★★ 内置歌曲配置 ★★★
+        // 请把音频文件放在仓库的 music/ 文件夹里
         const BUILTIN_SONGS = [
-            // 示例（请把示例替换成你实际的歌曲）：
-            // { name: '歌曲名1', url: 'music/song1.mp3', cover: 'music/cover1.jpg' },
-            // { name: '歌曲名2', url: 'music/song2.mp3', cover: 'music/cover2.jpg' },
-            // { name: '歌曲名3', url: 'music/song3.mp3' },
+            { name: 'Bad Apple!!', url: 'music/bad-apple.mp3' },
+            { name: 'どうして…', url: 'music/doushite.mp3' },
         ];
 
         const playBtn = document.getElementById('playBtn');
@@ -1016,7 +899,6 @@
             }
         }
 
-        // 加载内置歌曲
         function loadBuiltinSongs() {
             BUILTIN_SONGS.forEach(song => {
                 playlist.push({
@@ -1044,7 +926,7 @@
                 console.error('播放失败:', err);
                 isPlaying = false;
                 updatePlayerUI();
-                showToast('播放失败，可能是跨域限制或格式不支持');
+                showToast('播放失败，可能是文件不存在或格式不支持');
             });
             updatePlayerUI();
         }
@@ -1101,15 +983,12 @@
                 musicArtist.textContent = item.source === 'local' ? '本地音乐' :
                                           item.source === 'builtin' ? '内置音乐' : '在线音乐';
 
-                // ★★★ 封面显示 ★★★
                 musicCover.innerHTML = '';
                 if (item.cover) {
-                    // 有封面图就显示图片
                     const img = document.createElement('img');
                     img.src = item.cover;
                     img.alt = item.name;
                     img.onerror = () => {
-                        // 加载失败就回退到 Emoji
                         musicCover.textContent = '🎵';
                     };
                     musicCover.appendChild(img);
@@ -1213,9 +1092,7 @@
             addMusicFromUrl(url.trim(), name.trim());
         });
 
-        // ============================================================
-        //  音乐网站弹窗
-        // ============================================================
+        // 音乐网站弹窗
         function buildMusicTabs() {
             musicTabs.innerHTML = '';
             musicSites.forEach((site, idx) => {
@@ -1280,7 +1157,7 @@
 
         // 初始化
         buildMusicTabs();
-        loadBuiltinSongs();  // ★ 加载内置歌曲
+        loadBuiltinSongs();
         updatePlayerUI();
         updateMusicList();
 
@@ -1638,9 +1515,7 @@
             }
         });
 
-        // ============================================================
-        //  左侧水果侧边栏
-        // ============================================================
+        // 左侧水果侧边栏
         function buildSidebar() {
             const sidebar = document.getElementById('sidebar');
             while (sidebar.children.length > 1) {
